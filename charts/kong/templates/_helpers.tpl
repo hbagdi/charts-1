@@ -501,9 +501,9 @@ The name of the service used for the ingress controller's validation webhook
     sizeLimit: {{ .Values.deployment.tmpDir.sizeLimit }}
 {{- if and ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) .Values.certificates.enabled -}}
 {{- if .Values.certificates.cluster.enabled }}
-- name: {{ include "kong.fullname" . }}-cluster-cert
+- name: kong-cluster-cert
   secret:
-    secretName: {{ include "kong.fullname" . }}-cluster-cert
+    secretName: kong-cluster-cert
 {{- end }}
 {{- if .Values.certificates.proxy.enabled }}
 - name: {{ include "kong.fullname" . }}-proxy-cert
@@ -626,7 +626,7 @@ The name of the service used for the ingress controller's validation webhook
   mountPath: /tmp
 {{- if and ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) .Values.certificates.enabled -}}
 {{- if .Values.certificates.cluster.enabled }}
-- name: {{ include "kong.fullname" . }}-cluster-cert
+- name: kong-cluster-cert
   mountPath: /etc/cert-manager/cluster/
 {{- end }}
 {{- if .Values.certificates.proxy.enabled }}

@@ -28,29 +28,34 @@
 {{- include "kong.certificate" $certificateConfig -}}
 {{- end }}
 
-{{- if .Values.certificates.cluster.enabled }}
+{{- if (and .Values.certificates.cluster.enabled (eq .Values.env.role "control_plane")) }}
 {{- $certificateConfig := dict -}}
 {{- $certificateConfig = mustMerge (mustDeepCopy $genericCertificateConfig) $certificateConfig -}}
 {{- $_ := set $certificateConfig "dnsNames" (list) -}}
-{{- $_ := set $certificateConfig "commonName" "kong_cluster" -}}
+{{- $_ := set $certificateConfig "commonName" "kong_clustering" -}}
 {{- $certificateConfig = (mustMerge $certificateConfig .Values.certificates.cluster) -}}
 {{- $_ := set $certificateConfig "serviceName" "cluster" -}}
+{{- $_ := set $certificateConfig "certificateName" "kong-cluster" -}}
 {{- include "kong.certificate" $certificateConfig -}}
 {{- end }}
 
 {{- end }}
 
 {{- define "kong.certificate" }}
+{{-  $certificateName := printf "%s-%s" .fullName .serviceName -}}
+{{- if .certificateName }}
+{{- $certificateName = .certificateName -}}
+{{- end }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .fullName }}-{{ .serviceName }}
+  name: {{ $certificateName }}
   namespace:  {{ .namespace }}
   labels:
     {{- .metaLabels | nindent 4 }}
 spec:
-  secretName: {{ .fullName }}-{{ .serviceName }}-cert
+  secretName: {{ $certificateName }}-cert
   commonName: {{ .commonName }}
   dnsNames:
   {{- range (append .dnsNames .commonName) }}
